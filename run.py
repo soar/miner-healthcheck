@@ -64,7 +64,7 @@ class MinerHealthCheck(object):
             return
 
         if time.time() - self.last_ifttt_report <= 300:
-            print(f"Last report was sent less than 5 minutes ago, skipping...")
+            print(f"Last report was sent less than 5 minutes ago, skipping... (got: {event_name} - {message}")
             return
 
         url = f'https://maker.ifttt.com/trigger/{self.args.ifttt_action}/with/key/{self.args.ifttt_key}'

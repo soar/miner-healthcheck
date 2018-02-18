@@ -145,7 +145,7 @@ class MinerHealthCheck(object):
 
         dev_errors = dev_info.get('Hardware Errors')
         if dev_errors is None or not isinstance(dev_errors, int):
-            self.ifttt_report("gpu_has_errors", f"GPU {dev_id} has errors: {dev_errors}")
+            self.ifttt_report("gpu_errors_wrong_info", f"GPU {dev_id} errors info: {dev_errors}")
             return False
         if dev_errors > self.gpu_errors_count[dev_id]:
             self.gpu_errors_count[dev_id] = dev_errors

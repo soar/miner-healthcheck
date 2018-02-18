@@ -143,7 +143,9 @@ class MinerHealthCheck(object):
         if dev_activity is None or not isinstance(dev_activity, int):
             self.ifttt_report("gpu_activity_wrong_info", f"GPU {dev_id} activity wrong info: {dev_activity}")
             return False
-        if dev_activity < 70:
+        if dev_activity >= 80:
+            self.low_activity_events_count[dev_id] = 0
+        else:
             if self.low_activity_events_count[dev_id] <= 3:
                 self.low_activity_events_count[dev_id] += 1
             else:

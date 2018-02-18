@@ -1,4 +1,5 @@
 import argparse
+import collections
 import json
 import platform
 import socket
@@ -17,6 +18,8 @@ class MinerHealthCheck(object):
         self.args = cmdargs
 
         self.last_ifttt_report = time.time()
+
+        self.gpu_errors_count = collections.defaultdict(int)
 
         self.miner_api_addr = '127.1'
         self.miner_api_port = 4028
@@ -141,7 +144,11 @@ class MinerHealthCheck(object):
             return False
 
         dev_errors = dev_info.get('Hardware Errors')
-        if dev_errors is None or not isinstance(dev_errors, int) or dev_errors > 0:
+        if dev_errors is None or not isinstance(dev_errors, int):
+            self.ifttt_report("gpu_has_errors", f"GPU {dev_id} has errors: {dev_errors}")
+            return False
+        if dev_errors > self.gpu_errors_count[dev_id]:
+            self.gpu_errors_count[dev_id] = dev_errors
             self.ifttt_report("gpu_has_errors", f"GPU {dev_id} has errors: {dev_errors}")
             return False
 

@@ -14,16 +14,27 @@ sgminer.exe --api-listen <your-other-parameters>
 
 ### 2. Download fresh version
 
-It's located here: https://yadi.sk/d/x70GZTrP3RaGsC/tools/healthcheck
+You can get it from:
+* Releases page: [https://github.com/soar/miner-healthcheck/releases]()
+* Yandex.Disk: https://yadi.sk/d/x70GZTrP3RaGsC/tools/healthcheck
 
 ### 3. Get keys
 
 You need two keys:
 
-- `MONITORING_URL`/`UNIQUE_MONITORING_KEY` - this is unique part of monitoring URL, where periodic checks are sent
-- `COMMON_NOTIFICATION_KEY` - this is key for reporting, it is common between mining rigs/PCs
+#### StatusCake Integration
 
-You can get both by asking @soar.
+Each started instance of `miner-healthcheck` will send push messages to this URL every X seconds. If StatusCake won't receive this messages for some time - you will get notification.
+
+So this is check - is your RIG alive or not?
+
+How to get your `STATUSCAKE_PUSH_URL`: [https://github.com/soar/miner-healthcheck/wiki/StatusCake-Integration]()
+
+#### IFTTT Integration
+
+When your RIG have some troubles - push notification will be sent to IFTTT webhook URL. This URL is common for all your RIGs.
+
+How to get your `YOUR_IFTTT_WEBHOOK_KEY`: [https://github.com/soar/miner-healthcheck/wiki/IFTTT-Integration]()
 
 ### 4. First run and check
 
@@ -31,9 +42,9 @@ Perform test running with next command line:
 
 ```
 miner-healthcheck.exe ^
-    --health-report-url "https://MONITORING_URL/UNIQUE_MONITORING_KEY" ^
+    --health-report-url "STATUSCAKE_PUSH_URL" ^
     --ifttt-check ^
-    --ifttt-key COMMON_NOTIFICATION_KEY
+    --ifttt-key YOUR_IFTTT_WEBHOOK_KEY
 ```
 
 If test was successful - you should see message in Telegram:
@@ -47,8 +58,8 @@ Message: success
 
 ```
 miner-healthcheck.exe ^
-    --health-report-url "https://MONITORING_URL/UNIQUE_MONITORING_KEY" ^
-    --ifttt-key COMMON_NOTIFICATION_KEY ^
+    --health-report-url "STATUSCAKE_PUSH_URL" ^
+    --ifttt-key YOUR_IFTTT_WEBHOOK_KEY ^
     --sgminer ^
     --gpu-hashrate-threshold 0.3 
 ```
@@ -58,15 +69,13 @@ miner-healthcheck.exe ^
 1. Script should be started at system startup
 2. It has infinite loop and runs forever
 3. Every X seconds - it performs checks:
-	- SGMiner is alive
-	- SGMiner answers on API requests
-	- Each GPU is alive
-	- GPUs hash-rate is above threshhold
-4. If checks passed successfully - it makes remote HTTP request to report about it health
-5. If remote endpoint doesn't receive health check report in Y seconds - it sends notification to:
-	- Telegram Chat *Miners*
-	- Email *i@soar.name*
-	- Optional notifications may be added
+    - if SGMiner checks are enabled:
+        - SGMiner is alive
+        - SGMiner answers on API requests
+        - Each GPU is alive
+        - GPUs hash-rate is above threshhold
+4. If checks passed successfully - it makes remote HTTP request to report about it health to `STATUSCAKE_PUSH_URL`
+5. If remote endpoint doesn't receive health check report in Y seconds - StatusCake sends notification to configured targets (see Web-UI for settings)
 	
 ## Parameters
 
@@ -79,6 +88,11 @@ miner-healthcheck.exe ^
 ### Examples
 
 ```
-miner-healthcheck.exe --health-report-url "https://MONITORING_URL/UNIQUE_MONITORING_KEY" --ifttt-key COMMON_NOTIFICATION_KEY --gpu-hashrate-threshold 0.3 --sgminer
+miner-healthcheck.exe --health-report-url "https://push.statuscake.com/?PK=XXXXXXXX&TestID=00000&time=0" --sgminer --gpu-hashrate-threshold 0.36 --ifttt-key lk9y6DOXXXXXXXXX
 ```
-	
+
+## Building
+
+```
+pyinstaller --onefile --icon miner.ico --name miner-healthcheck-v1.2.exe run.py
+```	

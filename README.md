@@ -1,4 +1,6 @@
-# Health Check Script
+# Miner Health-Check Script
+
+![screenshot.png](https://github.com/soar/miner-healthcheck/wiki/images/screenshot.png)
 
 ## Installation
 

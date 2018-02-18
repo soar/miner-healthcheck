@@ -20,6 +20,7 @@ class MinerHealthCheck(object):
         self.last_ifttt_report = time.time()
 
         self.gpu_errors_count = collections.defaultdict(int)
+        self.low_activity_events_count = collections.defaultdict(int)
 
         self.miner_api_addr = '127.1'
         self.miner_api_port = 4028
@@ -139,9 +140,16 @@ class MinerHealthCheck(object):
             return False
 
         dev_activity = dev_info.get('GPU Activity')
-        if dev_activity is None or not isinstance(dev_activity, int) or dev_activity < 70:
-            self.ifttt_report("gpu_activity_too_low", f"GPU {dev_id} activity is {dev_activity}")
+        if dev_activity is None or not isinstance(dev_activity, int):
+            self.ifttt_report("gpu_activity_wrong_info", f"GPU {dev_id} activity wrong info: {dev_activity}")
             return False
+        if dev_activity < 70:
+            if self.low_activity_events_count[dev_id] <= 3:
+                self.low_activity_events_count[dev_id] += 1
+            else:
+                self.low_activity_events_count[dev_id] = 0
+                self.ifttt_report("gpu_activity_too_low", f"GPU {dev_id} activity is {dev_activity}")
+                return False
 
         dev_errors = dev_info.get('Hardware Errors')
         if dev_errors is None or not isinstance(dev_errors, int):

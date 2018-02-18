@@ -16,6 +16,8 @@ class MinerHealthCheck(object):
     def __init__(self, cmdargs):
         self.args = cmdargs
 
+        self.last_ifttt_report = time.time()
+
         self.miner_api_addr = '127.1'
         self.miner_api_port = 4028
 
@@ -57,6 +59,10 @@ class MinerHealthCheck(object):
                 print("Requested check for IFTTT integration, but name and/or key not specified!")
             return
 
+        if time.time() - self.last_ifttt_report <= 300:
+            print(f"Last report was sent less than 5 minutes ago, skipping...")
+            return
+
         url = f'https://maker.ifttt.com/trigger/{self.args.ifttt_action}/with/key/{self.args.ifttt_key}'
         try:
             r = requests.post(url, json={
@@ -73,6 +79,8 @@ class MinerHealthCheck(object):
             if self.args.debug:
                 print(f"Traceback: ")
                 traceback.print_exc()
+        else:
+            self.last_ifttt_report = time.time()
 
     def check_sgminer(self):
         sgminer_healthy = True
